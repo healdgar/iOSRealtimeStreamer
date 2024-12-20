@@ -97,7 +97,7 @@ class RealtimeViewModel: NSObject, ObservableObject, RTCPeerConnectionDelegate, 
     }
 
     // MARK: - Ephemeral Key (Temporary/Unsafe Method)
-    private func fetchEphemeralKeyTemp(model: String = "gpt-4o-realtime-preview-2024-12-17",
+    private func fetchEphemeralKeyTemp(model: String = "gpt-4o-mini-realtime-preview",
                                        voice: String = "verse",
                                        completion: @escaping (String?) -> Void) {
         guard let url = URL(string: "https://api.openai.com/v1/realtime/sessions") else {
