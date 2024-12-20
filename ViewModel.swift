@@ -4,6 +4,25 @@ import Combine
 import AVFoundation
 import WebRTC
 
+class Config {
+    static let shared = Config()
+
+    private var secrets: [String: Any] = [:]
+
+    private init() {
+        if let path = Bundle.main.path(forResource: "Secrets", ofType: "plist"),
+           let dictionary = NSDictionary(contentsOfFile: path) as? [String: Any] {
+            self.secrets = dictionary
+        } else {
+            print("Secrets.plist file not found or invalid format.")
+        }
+    }
+
+    func get(_ key: String) -> String? {
+        return secrets[key] as? String
+    }
+}
+
 class RealtimeViewModel: NSObject, ObservableObject, RTCPeerConnectionDelegate, RTCDataChannelDelegate {
     @Published var conversation: [ConversationItem] = []
     @Published var connectionStatus: String = "Disconnected"
@@ -11,7 +30,7 @@ class RealtimeViewModel: NSObject, ObservableObject, RTCPeerConnectionDelegate, 
 
     // TEMPORARY: Your standard API key here for local testing only.
     // DO NOT USE IN PRODUCTION.
-    private let standardAPIKey = "KEYFORTESTINGONLY"
+    private var standardAPIKey = "KEYFORTESTINGONLY"
 
     private var peerConnectionFactory: RTCPeerConnectionFactory!
     private var peerConnection: RTCPeerConnection?
@@ -21,6 +40,14 @@ class RealtimeViewModel: NSObject, ObservableObject, RTCPeerConnectionDelegate, 
     private let audioSession = AVAudioSession.sharedInstance()
 
     override init() {
+        // Retrieve the API key from Secrets.plist
+        if let apiKey = Config.shared.get("STANDARD_API_KEY") {
+            self.standardAPIKey = apiKey
+        } else {
+            fatalError("API Key not found in Secrets.plist")
+        }
+        
+        
         super.init()
         setupAudioSession()
         setupPeerConnectionFactory()
